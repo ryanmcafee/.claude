@@ -1,0 +1,51 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "atlassian": {
+      "url": "https://mcp.atlassian.com/v1/sse",
+      "transport": "sse",
+      "command": "uvx",
+      "args": [
+        "mcp-atlassian",
+        "--jira-url",
+        "${JIRA_URL}",
+        "--jira-username",
+        "${JIRA_USERNAME}",
+        "--jira-token",
+        "${JIRA_TOKEN}",
+        "--confluence-url",
+        "${CONFLUENCE_URL}",
+        "--confluence-username",
+        "${CONFLUENCE_USERNAME}",
+        "--confluence-token",
+        "${CONFLUENCE_TOKEN}"
+      ],
+      "env": {}
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "time": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-time"]
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    }
+  }
+}
