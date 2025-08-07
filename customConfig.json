@@ -1,0 +1,6 @@
+{
+  "notificationSoundEnabled": true,
+  "notificationSound": "Ping",
+  "stopSound": "Glass",
+  "forceNotifyIfFocused": true
+}

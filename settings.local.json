@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_network_requests",
+      "Bash(mkdir:*)",
+      "mcp__playwright__browser_console_messages",
+      "Bash(python3:*)",
+      "Bash(pip3 install:*)",
+      "Bash(/usr/bin/python3 -m pip install:*)",
+      "Bash(/usr/bin/python3:*)",
+      "Bash(node:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(kill:*)",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_click",
+      "Bash(chmod:*)",
+      "Bash(./download-website.sh)",
+      "Bash(rm:*)",
+      "Bash(zip:*)",
+      "Bash(mv:*)"
+    ],
+    "deny": []
+  }
+}

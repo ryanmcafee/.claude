@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.anthropic.com)"
+    ],
+    "deny": []
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/log-tool-use.js"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/notify.js"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/notify.js"
+          }
+        ]
+      }
+    ]
+  }
+}
