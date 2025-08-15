@@ -6,6 +6,17 @@
     "deny": []
   },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "tool_name:Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/security-guard.js"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "",
@@ -13,6 +24,10 @@
           {
             "type": "command",
             "command": "node ~/.claude/hooks/log-tool-use.js"
+          },
+          {
+            "type": "command", 
+            "command": "node ~/.claude/hooks/audit-logger.js"
           }
         ]
       }

@@ -1,0 +1,192 @@
+{
+  "version": "1.0.0",
+  "description": "Claude Code Security Policy - Protects against dangerous operations",
+  "enabled": true,
+  "policies": {
+    "file_destruction": {
+      "enabled": true,
+      "block_patterns": [
+        "rm\\s+.*-[rf].*\\s*/\\s*$",
+        "rm\\s+.*-[rf].*\\s+/[^.].*",
+        "rm\\s+-[rf]+\\s+.*\\*",
+        "shred\\s+.*-[vfzun].*",
+        "dd\\s+.*of=/dev/",
+        "dd\\s+.*if=.*/dev/",
+        ">/dev/sd[a-z]",
+        ">.*\\..*&&.*rm"
+      ],
+      "require_confirmation": [
+        "rm\\s+-[rf].*\\./",
+        "rm\\s+.*\\*",
+        "find\\s+.*-delete",
+        "find\\s+.*-exec\\s+rm"
+      ]
+    },
+    "system_modification": {
+      "enabled": true,
+      "block_patterns": [
+        "chmod\\s+(777|666)\\s+/(bin|usr|etc|boot|sys)",
+        "chmod\\s+-R\\s+(777|666)\\s+/",
+        "chown\\s+.*\\s+/(bin|usr|etc|boot|sys)",
+        "chown\\s+-R\\s+.*\\s+/",
+        "mount\\s+.*/(bin|usr|etc|boot|sys)",
+        "umount\\s+/(bin|usr|etc|boot|sys)"
+      ],
+      "require_confirmation": [
+        "chmod\\s+(777|666)",
+        "chmod\\s+.*-R.*/(usr|bin|etc)"
+      ]
+    },
+    "process_control": {
+      "enabled": true,
+      "block_patterns": [
+        "kill\\s+-9\\s+-1",
+        "killall\\s+-9\\s+.*",
+        "sudo\\s+(shutdown|reboot|halt)",
+        "init\\s+0",
+        "pkill\\s+-f\\s+.*"
+      ],
+      "require_confirmation": [
+        "kill\\s+-9\\s+[0-9]+",
+        "killall\\s+.*"
+      ]
+    },
+    "network_security": {
+      "enabled": true,
+      "block_patterns": [
+        "nc\\s+-l.*-e\\s+/bin/",
+        "wget\\s+.*\\|\\s*(sh|bash)",
+        "wget\\s+-[qO-]*\\s+.*\\|\\s*(sh|bash)",
+        "curl\\s+.*\\|\\s*(sh|bash)",
+        "telnet\\s+.*\\s+/bin/",
+        "ssh\\s+.*-o\\s+.*ProxyCommand"
+      ],
+      "require_confirmation": [
+        "wget\\s+http://[^\\s]*",
+        "curl\\s+-[Lf]\\s+http://[^\\s]*"
+      ]
+    },
+    "permission_escalation": {
+      "enabled": true,
+      "block_patterns": [
+        "sudo\\s+su\\s+-",
+        "sudo\\s+.*NOPASSWD",
+        "chmod\\s+\\+s\\s+",
+        "setuid.*root"
+      ],
+      "require_confirmation": [
+        "sudo\\s+chmod",
+        "sudo\\s+chown",
+        "sudo\\s+rm"
+      ]
+    },
+    "disk_operations": {
+      "enabled": true,
+      "block_patterns": [
+        "fdisk\\s+/dev/",
+        "mkfs\\.",
+        "format\\s+/dev/",
+        "parted\\s+/dev/.*rm",
+        "gparted"
+      ]
+    },
+    "archive_operations": {
+      "enabled": true,
+      "block_patterns": [
+        "tar\\s+.*\\.\\./",
+        "unzip\\s+-o.*\\.\\./",
+        "tar\\s+.*--absolute-names"
+      ],
+      "require_confirmation": [
+        "tar\\s+-.*x.*f",
+        "unzip\\s+-o"
+      ]
+    },
+    "symlink_attacks": {
+      "enabled": true,
+      "block_patterns": [
+        "ln\\s+-s.*\\.\\./"
+      ],
+      "safe_directories": [
+        "$(pwd)",
+        ".",
+        "./"
+      ]
+    },
+    "environment_manipulation": {
+      "enabled": true,
+      "block_patterns": [
+        "export\\s+PATH=.*:",
+        "export\\s+LD_PRELOAD",
+        "export\\s+LD_LIBRARY_PATH",
+        "alias\\s+.*="
+      ]
+    },
+    "code_execution": {
+      "enabled": true,
+      "block_patterns": [
+        "eval\\s+\\$",
+        "eval\\s+\"\\$\\(",
+        "source\\s+/tmp/",
+        "bash\\s+-c\\s+.*\\$",
+        "sh\\s+-c\\s+.*\\$",
+        "exec\\s+.*\\$"
+      ],
+      "require_confirmation": [
+        "source\\s+",
+        "\\. \\s+"
+      ]
+    }
+  },
+  "path_restrictions": {
+    "enabled": true,
+    "blocked_paths": [
+      "/bin",
+      "/usr/bin", 
+      "/sbin",
+      "/usr/sbin",
+      "/etc",
+      "/boot",
+      "/sys",
+      "/proc",
+      "/dev"
+    ],
+    "allowed_operations_outside_cwd": [
+      "ls",
+      "cat",
+      "less",
+      "head", 
+      "tail",
+      "grep",
+      "find"
+    ],
+    "always_require_confirmation_outside_cwd": [
+      "rm",
+      "mv",
+      "cp",
+      "chmod",
+      "chown"
+    ]
+  },
+  "confirmation_settings": {
+    "timeout_seconds": 30,
+    "default_response": "block",
+    "show_command_preview": true,
+    "show_risk_explanation": true
+  },
+  "logging": {
+    "enabled": true,
+    "log_blocked_commands": true,
+    "log_confirmed_commands": true,
+    "log_location": "~/.claude/logs/security.log",
+    "include_full_command": true,
+    "include_working_directory": true,
+    "include_timestamp": true
+  },
+  "bypass": {
+    "enabled": false,
+    "bypass_keyword": "CLAUDE_SECURITY_BYPASS",
+    "require_explicit_bypass": true,
+    "log_bypass_attempts": true
+  }
+}
