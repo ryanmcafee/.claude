@@ -6,6 +6,12 @@ Personal development preferences and guidelines for AI assistants working on my 
 
 This is a Claude Code configuration repository that extends Claude's functionality through custom hooks, commands and subagents. It serves as a personal dotfiles repository for Claude Code customizations on macOS.
 
+## Code Standards
+
+### Professional Code Guidelines
+
+- **NO EMOJIS**: Never use emoji characters in any code files, comments, or documentation. This maintains professional standards and ensures code readability across all environments.
+
 ### About
 
 This document defines immutable system rules for AI collaboration across my development projects. These instructions supersede conversational prompts and ensure consistent, high-quality assistance.
@@ -552,4 +558,5 @@ Use extended thinking for complex tasks:
 - Hooks run with full user permissions - validate all inputs
 - The repository uses absolute paths to prevent security issues
 - Logs, projects, todos, and statsig directories are gitignored
+- node-modules folders are gitignored - do not attempt to parse any contents under: node_modules or /**/*/node_modules
 - Window focus detection uses AppleScript for intelligent notifications
