@@ -1,12 +1,13 @@
 # JupiterOne Service Dependency Analysis
 
 ## Objective
-Analyze all JupiterOne GitHub repositories to build a comprehensive service dependency graph and deployment order visualization.
+Analyze all JupiterOne GitHub repositories to build a comprehensive service dependency graph and deployment order visualization using parallel sub-agents for maximum performance.
 
 ## Requirements
 - Use the GitHub CLI (`gh`), do not use GitHub MCP server
 - Generate comprehensive dependency analysis and visualizations
 - Identify circular dependencies and deployment tiers
+- Leverage sub-agents for parallel repository analysis
 
 ## Repository List
 Use the following list to output to a `repos.txt` file:
@@ -77,146 +78,176 @@ Use the following list to output to a `repos.txt` file:
 
 ## Instructions
 
-1. Initial Repository Analysis
-
-  Start with the repos.txt file containing 64 JupiterOne repository names
-
-  Use GitHub CLI to fetch from the JupiterOne organization:
-
-  For each repo, first check for deploy/terraform/dependencies.tf
-
-  If not found, check for deploy/dependencies.yaml (legacy pipeline indicator)
-
-  Also fetch project.name file for canonical service naming (if missing, use repo name)
-
-2. Monorepo Detection
-
-  For repositories without standard dependency files, check for monorepo patterns:
-
-  Pattern 1: deployments/*/ structure
-
-  Check for deployments/*/project.name
-
-  Check for deployments/*/deploy/terraform/dependencies.tf
-
-  Check for deployments/*/deploy/dependencies.yaml
-
-  Pattern 2: packages/*/ structure (e.g., persister-monorepo, file-service, graphql-proxy-service)
-
-  Check for packages/*/project.name
-
-  Check for packages/*/deploy/terraform/dependencies.tf
-
-  Check for packages/*/deploy/dependencies.yaml
-
-3. Dependency Extraction
-
-  From Terraform files: Extract all data "terraform_remote_state" "service_name" references
-
-  From YAML files: Extract all entries under the terraform: key
-
-  Normalize service names (convert underscores to hyphens)
-
-  Map to canonical names from project.name files
-
-4. Dependency Graph Analysis
-
-  Build a complete service graph that:
-
-  Identifies internal vs external dependencies
-
-  Detects all circular dependencies (especially bidirectional ones like iam-v2-service ↔ provision-cognito)
-
-  Calculates deployment tiers using topological sort
-
-  Handles circular dependencies by placing them in the final tier
-
-5. Visualization Requirements
-
-  Create an interactive HTML visualization using vis.js that:
-
-  Shows ALL services without truncation (expected ~68 services excluding integration sub-projects, or 142 with them)
-
-  Displays proper dependency arrows (A → B means A depends on B)
-
-  Color codes services:
-
-  Green: Regular services
-
-  Purple: Monorepo services
-
-  Orange: No dependencies
-
-  Red: Has circular dependencies
-
-  Includes complete lists of:
-
-  All deployment tiers with every service listed
-
-  All circular dependencies
-
-  Alphabetical service listing with metadata
-
-  Interactive features:
-
-  Click nodes for detailed information
-
-  Filter to show only circular dependencies
-
-  Hierarchical layout option
-
-  Physics stabilization
-
-6. Expected Discoveries
-
-  The analysis should reveal:
-
-  4 monorepos:
-
-  integrations: 91 services (can be excluded from visualization for clarity)
-
-  persister-monorepo: 2 services (jupiter-mapper, jupiter-persister)
-
-  file-service: 3 services (file-service-authorizer, file-service-client, file-service-api)
-
-  graphql-proxy-service: 1 service
-
-  Key canonical name mappings:
-
-  iam → iam-v2-service
-
-  rule-service → jupiter-rule-service
-
-  search-indexer → jupiter-search-indexer
-
-  questions-service → jupiter-questions-service
-
-  Circular dependencies to find:
-
-  iam-v2-service ↔ provision-cognito
-
-  entitlement-service ↔ jupiter-rule-service
-
-7. Output Files
-
-  Generate:
-
-  Complete dependency graph JSON with all services and their dependencies
-
-  Deployment order showing which services can be deployed in parallel
-
-  HTML visualization showing the complete service architecture
-
-  Analysis reports identifying circular dependencies and deployment tiers
-
-8. Important Notes
-
-  Some repos have monorepo structure but no valid services (e.g., in-graph-mapper, jupiter-integration-service)
-
-  Some repos are truly without dependencies (e.g., neo4j, event-bus)
-
-  The integrations monorepo alone contains 91 sub-services, making the total count 142 services instead of just 64
-
-  Always use canonical names from project.name files for accurate dependency matching
-
-  Handle both Terraform and YAML dependency formats
+### Phase 1: Parallel Repository Discovery (Using Sub-Agents)
+
+Deploy 10 parallel sub-agents to analyze repository batches:
+
+```
+Divide the 64 repositories into 10 batches (~6-7 repos each)
+
+Each sub-agent will:
+- Use gh CLI to fetch repository contents
+- Check for deploy/terraform/dependencies.tf
+- Check for deploy/dependencies.yaml (legacy)
+- Fetch project.name file for canonical naming
+- Return structured JSON with findings
+```
+
+Sub-agent task distribution:
+- Agent 1: Repos 1-7
+- Agent 2: Repos 8-14
+- Agent 3: Repos 15-21
+- Agent 4: Repos 22-28
+- Agent 5: Repos 29-35
+- Agent 6: Repos 36-42
+- Agent 7: Repos 43-49
+- Agent 8: Repos 50-56
+- Agent 9: Repos 57-61
+- Agent 10: Repos 62-64 + monorepo detection
+
+### Phase 2: Parallel Monorepo Analysis (Using Sub-Agents)
+
+Deploy 4 parallel sub-agents for monorepo detection:
+
+```
+Agent 1: Analyze repositories with deployments/*/ structure
+- Check for deployments/*/project.name
+- Check for deployments/*/deploy/terraform/dependencies.tf
+- Check for deployments/*/deploy/dependencies.yaml
+
+Agent 2: Analyze repositories with packages/*/ structure
+- Check for packages/*/project.name
+- Check for packages/*/deploy/terraform/dependencies.tf
+- Check for packages/*/deploy/dependencies.yaml
+
+Agent 3: Deep scan persister-monorepo and file-service
+- Expected: persister-monorepo (2 services)
+- Expected: file-service (3 services)
+
+Agent 4: Deep scan integrations and graphql-proxy-service
+- Expected: integrations (91 services)
+- Expected: graphql-proxy-service (1 service)
+```
+
+### Phase 3: Parallel Dependency Extraction (Using Sub-Agents)
+
+Deploy 3 parallel sub-agents for dependency extraction:
+
+```
+Agent 1: Parse all Terraform dependencies
+- Extract data "terraform_remote_state" "service_name" references
+- Normalize service names (underscores to hyphens)
+- Map to canonical names from project.name files
+
+Agent 2: Parse all YAML dependencies
+- Extract entries under terraform: key
+- Normalize service names
+- Map to canonical names
+
+Agent 3: Cross-reference and validate dependencies
+- Identify internal vs external dependencies
+- Build preliminary dependency mappings
+- Flag inconsistencies for review
+```
+
+### Phase 4: Parallel Graph Analysis (Using Sub-Agents)
+
+Deploy 5 parallel sub-agents for comprehensive analysis:
+
+```
+Agent 1: Circular dependency detection
+- Identify all circular dependencies
+- Focus on known patterns (iam-v2-service ↔ provision-cognito)
+- Document bidirectional dependencies
+
+Agent 2: Topological sort and tier calculation
+- Calculate deployment tiers
+- Handle circular dependencies appropriately
+- Generate deployment order
+
+Agent 3: Service categorization
+- Identify monorepo services
+- Categorize standalone services
+- Flag services without dependencies
+
+Agent 4: Dependency validation
+- Cross-check all dependency references
+- Verify canonical name mappings
+- Identify broken or missing dependencies
+
+Agent 5: Statistics generation
+- Count total services and dependencies
+- Calculate dependency density
+- Generate metrics for visualization
+```
+
+### Phase 5: Visualization Generation
+
+Create an interactive HTML visualization using vis.js:
+
+**Visual Requirements:**
+- Show ALL services without truncation (~68 services or 142 with integrations)
+- Proper dependency arrows (A → B means A depends on B)
+- Color coding:
+  - Green: Regular services
+  - Purple: Monorepo services
+  - Orange: No dependencies
+  - Red: Has circular dependencies
+
+**Data Display:**
+- Complete deployment tiers with all services
+- All circular dependencies highlighted
+- Alphabetical service listing with metadata
+
+**Interactive Features:**
+- Click nodes for detailed information
+- Filter to show only circular dependencies
+- Hierarchical layout option
+- Physics stabilization
+
+### Phase 6: Expected Discoveries
+
+The parallel analysis should reveal:
+
+**Monorepos (4 total):**
+- integrations: 91 services (optional exclusion for clarity)
+- persister-monorepo: 2 services (jupiter-mapper, jupiter-persister)
+- file-service: 3 services (file-service-authorizer, file-service-client, file-service-api)
+- graphql-proxy-service: 1 service
+
+**Key Canonical Name Mappings:**
+- iam → iam-v2-service
+- rule-service → jupiter-rule-service
+- search-indexer → jupiter-search-indexer
+- questions-service → jupiter-questions-service
+
+### Phase 7: Output Generation
+
+Generate comprehensive artifacts:
+
+1. **dependency-graph.json** - Complete service dependency map
+2. **deployment-order.json** - Parallel deployment tiers
+3. **visualization.html** - Interactive vis.js graph
+4. **analysis-report.md** - Circular dependencies and metrics
+5. **service-catalog.json** - All services with metadata
+
+### Implementation Notes
+
+**Performance Optimization:**
+- Use 10+ parallel sub-agents for ~10x speedup
+- Batch GitHub API calls within each agent
+- Process results concurrently, not sequentially
+
+**Edge Cases:**
+- Some repos have monorepo structure but no services
+- Some repos have no dependencies (neo4j, event-bus)
+- Total service count: 142 with integrations, 68 without
+- Always use canonical names from project.name files
+- Support both Terraform and YAML formats
+
+**Execution Strategy:**
+1. Launch Phase 1 agents (10 parallel) for initial discovery
+2. Launch Phase 2 agents (4 parallel) for monorepo analysis
+3. Launch Phase 3 agents (3 parallel) for dependency extraction
+4. Launch Phase 4 agents (5 parallel) for graph analysis
+5. Synthesize all results and generate visualizations
