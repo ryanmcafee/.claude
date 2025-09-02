@@ -8,6 +8,7 @@ Analyze all JupiterOne GitHub repositories to build a comprehensive service depe
 - Generate comprehensive dependency analysis and visualizations
 - Identify circular dependencies and deployment tiers
 - Leverage sub-agents for parallel repository analysis
+- Write and use python code to help determistically collect the needed data
 
 ## Repository List
 Use the following list to output to a `repos.txt` file:
